@@ -2,3 +2,4 @@ A simple test to port my Arduino library code to run on the MCUXpresso IDE.
 I started from the blink sample and added my BitBang_I2C and OneBitDisplay
 libraries.
 
+The pin numbers I reference are bits on Port 1. e.g. SDA_PIN 26 means PIO1_26.
