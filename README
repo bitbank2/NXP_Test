@@ -1,0 +1,4 @@
+A simple test to port my Arduino library code to run on the MCUXpresso IDE.
+I started from the blink sample and added my BitBang_I2C and OneBitDisplay
+libraries.
+

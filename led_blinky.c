@@ -1,0 +1,84 @@
+/*
+ * Copyright 2019 NXP
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+#include "board.h"
+
+#include "pin_mux.h"
+#include "fsl_power.h"
+/*******************************************************************************
+ * Definitions
+ ******************************************************************************/
+#define BOARD_LED_PORT BOARD_LED_BLUE_GPIO_PORT
+#define BOARD_LED_PIN  BOARD_LED_BLUE_GPIO_PIN
+
+#include <OneBitDisplay.h>
+
+#define SDA_PIN 26U
+#define SCL_PIN 27U
+
+OBDISP obd;
+
+/*******************************************************************************
+ * Prototypes
+ ******************************************************************************/
+
+/*******************************************************************************
+ * Variables
+ ******************************************************************************/
+volatile uint32_t g_systickCounter;
+
+/*******************************************************************************
+ * Code
+ ******************************************************************************/
+void SysTick_Handler(void)
+{
+    if (g_systickCounter != 0U)
+    {
+        g_systickCounter--;
+    }
+}
+
+void SysTick_DelayTicks(uint32_t n)
+{
+    g_systickCounter = n;
+    while (g_systickCounter != 0U)
+    {
+    }
+}
+
+/*!
+ * @brief Main function
+ */
+int main(void)
+{
+    /* Init output LED GPIO. */
+    GPIO_PortInit(GPIO, BOARD_LED_PORT);
+    /* Board pin init */
+    /* set BOD VBAT level to 1.65V */
+    POWER_SetBodVbatLevel(kPOWER_BodVbatLevel1650mv, kPOWER_BodHystLevel50mv, false);
+    BOARD_InitPins();
+    BOARD_InitBootClocks();
+    SystemCoreClockUpdate();
+
+    obdI2CInit(&obd, OLED_128x64, -1, 0, 0, 0, SDA_PIN, SCL_PIN, -1, 100000U);
+    obdFill(&obd, 0, 1);
+    obdWriteString(&obd,0,0,0,(char *)"Hello World!", FONT_NORMAL, 0, 1);
+    /* Set systick reload value to generate 1ms interrupt */
+    if (SysTick_Config(SystemCoreClock / 1000U))
+    {
+        while (1)
+        {
+        }
+    }
+
+    while (1)
+    {
+        /* Delay 1000 ms */
+        SysTick_DelayTicks(1000U);
+        GPIO_PortToggle(GPIO, BOARD_LED_PORT, 1u << BOARD_LED_PIN);
+    }
+}
